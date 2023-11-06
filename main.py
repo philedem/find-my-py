@@ -93,7 +93,7 @@ def main():
 
     print("Entering serial modem mode")
 
-    while True:
+    #while True:
         # Implement the UART read and line processing here
         # You would read lines from the UART and send them using send_data_once_blocking
 
