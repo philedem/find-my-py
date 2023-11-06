@@ -1,7 +1,6 @@
 import random
 import time
-import bluetooth
-from uECC import uECC
+from ecdsa import SigningKey, SECP224R1
 
 # Set custom modem id
 modem_id = 0x42424242
@@ -25,17 +24,17 @@ rnd_addr = [0xFF, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF]
 
 # Generate a valid public key
 def generate_public_key():
-    curve = uECC.secp224r1()
-    private_key = random.randint(1, curve.q - 1)
-    public_key = uECC.compute_public_key(private_key, curve)
-    return private_key, public_key
+    sk = SigningKey.generate(curve=SECP224R1)
+    vk = sk.get_verifying_key()
+    return sk.to_string(), vk.to_string()
 
 # Check if a public key is valid
-def is_valid_pubkey(pub_key_compressed):
-    curve = uECC.secp224r1()
-    with_sign_byte = bytes([0x02]) + pub_key_compressed
-    pub_key_uncompressed = uECC.decompress(with_sign_byte, curve)
-    return uECC.valid_public_key(pub_key_uncompressed, curve)
+def is_valid_pubkey(public_key_bytes):
+    try:
+        vk = VerifyingKey.from_string(public_key_bytes, curve=SECP224R1)
+        return True
+    except:
+        return False
 
 # Set address from public key
 def set_addr_from_key(public_key):
@@ -65,7 +64,7 @@ def reset_advertising():
 
 # Function to send data once blocking
 def send_data_once_blocking(data_to_send, msg_id):
-    print("Data to send (msg_id: {}): {}".format(msg_id, data_to_send))
+    print("Data to send (msg_id: {}): {}".format(msg_id, data_to_send.decode('utf-8')))
     current_bit = 0
 
     for by_i in range(len(data_to_send)):
@@ -103,7 +102,5 @@ def main():
         # Implement the UART read and line processing here
         # You would read lines from the UART and send them using send_data_once_blocking
 
-
 if __name__ == "__main__":
     main()
-    
