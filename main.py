@@ -1,6 +1,7 @@
 import random
 import time
 import bluetooth
+from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import ec
 
 # Set custom modem id
@@ -24,8 +25,8 @@ adv_data = [
 rnd_addr = [0xFF, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF]
 
 # Generate a valid public key
-def generate_public_key():
-    private_key = ec.generate_private_key(ec.SECP224R1())
+def generate_private_key():
+    private_key = ec.generate_private_key(ec.SECP224R1(), backend=default_backend())
     public_key = private_key.public_key()
     return private_key, public_key
 
@@ -69,10 +70,10 @@ def send_data_once_blocking(data_to_send, msg_id):
                 current_bit = 0
 
             print("Sending byte {}, bit {}: {}".format(by_i, bi_i, current_bit))
-            private_key, public_key = generate_public_key()
+            private_key, public_key = generate_private_key()
 
             while not is_valid_pubkey(public_key):
-                private_key, public_key = generate_public_key()
+                private_key, public_key = generate_private_key()
 
             print("Generated public key: {}".format(public_key))
             set_addr_from_key(public_key)
@@ -92,7 +93,7 @@ def main():
 
     print("Entering serial modem mode")
 
-    #while True:
+    while True:
         # Implement the UART read and line processing here
         # You would read lines from the UART and send them using send_data_once_blocking
 
