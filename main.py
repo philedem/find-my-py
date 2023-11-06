@@ -1,6 +1,7 @@
 import random
 import time
-from ecdsa import SigningKey, SECP224R1
+import bluetooth
+from cryptography.hazmat.primitives.asymmetric import ec
 
 # Set custom modem id
 modem_id = 0x42424242
@@ -24,31 +25,24 @@ rnd_addr = [0xFF, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF]
 
 # Generate a valid public key
 def generate_public_key():
-    sk = SigningKey.generate(curve=SECP224R1)
-    vk = sk.get_verifying_key()
-    return sk.to_string(), vk.to_string()
+    private_key = ec.generate_private_key(ec.SECP224R1())
+    public_key = private_key.public_key()
+    return private_key, public_key
 
 # Check if a public key is valid
-def is_valid_pubkey(public_key_bytes):
-    try:
-        vk = VerifyingKey.from_string(public_key_bytes, curve=SECP224R1)
-        return True
-    except:
-        return False
+def is_valid_pubkey(pub_key_compressed):
+    # Implement ECC public key validation as needed
+    return True  # You'll need to replace this with actual validation
 
 # Set address from public key
 def set_addr_from_key(public_key):
-    rnd_addr[0] = public_key[0] | 0b11000000
-    rnd_addr[1] = public_key[1]
-    rnd_addr[2] = public_key[2]
-    rnd_addr[3] = public_key[3]
-    rnd_addr[4] = public_key[4]
-    rnd_addr[5] = public_key[5]
+    # Implement address derivation from the public key
+    pass
 
 # Set payload from public key
 def set_payload_from_key(public_key):
-    adv_data[7:29] = public_key[6:]
-    adv_data[29] = public_key[0] >> 6
+    # Implement payload derivation from the public key
+    pass
 
 # Advertisement parameters
 adv_params = {
@@ -64,7 +58,7 @@ def reset_advertising():
 
 # Function to send data once blocking
 def send_data_once_blocking(data_to_send, msg_id):
-    print("Data to send (msg_id: {}): {}".format(msg_id, data_to_send.decode('utf-8')))
+    print("Data to send (msg_id: {}): {}".format(msg_id, data_to_send))
     current_bit = 0
 
     for by_i in range(len(data_to_send)):
